@@ -31,3 +31,7 @@ yarn-error.log*
 
 # Claude Code (machine-local settings)
 .claude/settings.local.json
+
+# Temporary local verification / benchmark scripts
+verify.ts
+verify.mjs

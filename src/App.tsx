@@ -51,6 +51,9 @@ export default function App() {
   const [humanColor, setHumanColor] = useState<Player>('black')
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
   const [guideEnabled, setGuideEnabled] = useState(false)
+  // True once the guide has been switched on during the current game; a
+  // small ★ then marks the session. Cleared by a reload or a new game.
+  const [guideUsed, setGuideUsed] = useState(false)
   const [log, setLog] = useState<GameLog>(newGameLog)
   // When the human plays second, the game waits on a "start" press so the AI
   // does not move on its own the instant 後手 is chosen.
@@ -98,10 +101,15 @@ export default function App() {
 
   // Start a fresh game. It begins immediately when the human plays first
   // (先手); when the human is 後手, it waits for the "対局開始" press.
-  const startFreshGame = useCallback((color: Player) => {
-    setLog(newGameLog())
-    setStarted(color === 'black')
-  }, [])
+  const startFreshGame = useCallback(
+    (color: Player) => {
+      setLog(newGameLog())
+      setStarted(color === 'black')
+      // A new game: the ★ persists only if the guide is already on.
+      setGuideUsed(guideEnabled)
+    },
+    [guideEnabled],
+  )
 
   const handleRestart = useCallback(
     () => startFreshGame(humanColor),
@@ -142,6 +150,15 @@ export default function App() {
       startFreshGame(color)
     },
     [startFreshGame],
+  )
+
+  // Switching the guide on while a game is in progress marks the session.
+  const handleToggleGuide = useCallback(
+    (enabled: boolean) => {
+      setGuideEnabled(enabled)
+      if (enabled && game.status === 'playing') setGuideUsed(true)
+    },
+    [game.status],
   )
 
   const score = countDiscs(game.board)
@@ -192,7 +209,11 @@ export default function App() {
         selectedId={difficulty.id}
         onSelect={handleSelectDifficulty}
       />
-      <GuideToggle enabled={guideEnabled} onChange={setGuideEnabled} />
+      <GuideToggle
+        enabled={guideEnabled}
+        used={guideUsed}
+        onChange={handleToggleGuide}
+      />
 
       <section className="scoreboard">
         {(['black', 'white'] as const).map((color) => (

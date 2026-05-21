@@ -601,3 +601,11 @@
   font-size: 0.8rem;
   color: #cfd3d8;
 }
+
+/* --- guide-used marker (cheat tell) --- */
+.guide-mark {
+  margin-left: 3px;
+  font-size: 0.62rem;
+  color: #ffca28;
+  vertical-align: top;
+}
