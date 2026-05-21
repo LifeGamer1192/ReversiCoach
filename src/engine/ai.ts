@@ -43,10 +43,32 @@ function negamax(board: Board, player: Player, depth: number): number {
   return best
 }
 
+/** A legal move paired with its searched score (from the mover's view). */
+export interface MoveScore {
+  move: Position
+  score: number
+}
+
 /**
- * V3 AI: choose the move leading to the best position for `player`,
- * searching `depth` plies ahead with negamax. Ties are broken randomly
- * so games are not perfectly repetitive.
+ * Score every legal move for `player` by searching `depth` plies ahead
+ * (a depth below 1 is treated as 1). Higher scores are better for `player`.
+ */
+export function scoreMoves(
+  board: Board,
+  player: Player,
+  depth: number,
+): MoveScore[] {
+  const searchDepth = Math.max(1, depth)
+  return legalMoves(board, player).map((move) => {
+    const next = applyMove(board, player, move.row, move.col)
+    return { move, score: -negamax(next, opponent(player), searchDepth - 1) }
+  })
+}
+
+/**
+ * V3+ AI: choose the move leading to the best position for `player`,
+ * searching `depth` plies ahead. Ties are broken randomly so games are
+ * not perfectly repetitive.
  */
 export function chooseMinimaxMove(
   board: Board,
@@ -54,22 +76,15 @@ export function chooseMinimaxMove(
   depth: number,
   rng: () => number = Math.random,
 ): Position | null {
-  const moves = legalMoves(board, player)
-  if (moves.length === 0) return null
+  const scored = scoreMoves(board, player, depth)
+  if (scored.length === 0) return null
 
   let bestScore = -Infinity
-  let bestMoves: Position[] = []
-  for (const move of moves) {
-    const next = applyMove(board, player, move.row, move.col)
-    const score = -negamax(next, opponent(player), depth - 1)
-    if (score > bestScore) {
-      bestScore = score
-      bestMoves = [move]
-    } else if (score === bestScore) {
-      bestMoves.push(move)
-    }
+  for (const { score } of scored) {
+    if (score > bestScore) bestScore = score
   }
-  return bestMoves[Math.floor(rng() * bestMoves.length)]
+  const best = scored.filter((s) => s.score === bestScore)
+  return best[Math.floor(rng() * best.length)].move
 }
 
 /**

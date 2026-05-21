@@ -3,13 +3,17 @@ import './App.css'
 import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
 import { DifficultySelector } from './components/DifficultySelector'
+import { MoveCommentCard } from './components/MoveCommentCard'
+import { MoveLog } from './components/MoveLog'
 import { ScoreChart } from './components/ScoreChart'
 import { DEFAULT_DIFFICULTY, type DifficultyLevel } from './difficulty'
 import { chooseAiMove } from './engine/ai'
 import { countDiscs } from './engine/board'
+import { commentOnMove, type MoveComment } from './engine/coach'
 import { evaluateBoard } from './engine/evaluation'
 import { createGame, getWinner, playMove, type GameState } from './engine/game'
 import type { Player } from './engine/types'
+import type { MovePlay } from './game-log'
 
 /** The human plays black (and moves first); the AI plays white. */
 const HUMAN: Player = 'black'
@@ -23,53 +27,84 @@ const PLAYER_LABEL: Record<Player, string> = {
   white: '白（AI）',
 }
 
+/** The game played so far: every state, and every move that produced one. */
+interface GameLog {
+  /** Game states oldest-first; `states[0]` is the opening position. */
+  states: GameState[]
+  /** Moves played; `moves[i]` produced `states[i + 1]`. */
+  moves: MovePlay[]
+}
+
+function newGameLog(): GameLog {
+  return { states: [createGame()], moves: [] }
+}
+
 export default function App() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
-  // The full sequence of game states, oldest first; the last entry is current.
-  const [history, setHistory] = useState<GameState[]>(() => [createGame()])
+  const [log, setLog] = useState<GameLog>(newGameLog)
 
-  const game = history[history.length - 1]
+  const game = log.states[log.states.length - 1]
 
   // Drive the AI: on its turn, search for a move and play it after a short delay.
   useEffect(() => {
     if (game.status !== 'playing' || game.current !== AI) return
     const timer = setTimeout(() => {
-      setHistory((past) => {
-        const current = past[past.length - 1]
-        if (current.status !== 'playing' || current.current !== AI) return past
+      setLog((prev) => {
+        const current = prev.states[prev.states.length - 1]
+        if (current.status !== 'playing' || current.current !== AI) return prev
         const move = chooseAiMove(current.board, AI, difficulty.depth)
-        if (!move) return past
+        if (!move) return prev
         const next = playMove(current, move.row, move.col)
-        return next === current ? past : [...past, next]
+        if (next === current) return prev
+        return {
+          states: [...prev.states, next],
+          moves: [...prev.moves, { player: AI, move }],
+        }
       })
     }, AI_DELAY_MS)
     return () => clearTimeout(timer)
   }, [game, difficulty])
 
   const handleCellClick = useCallback((row: number, col: number) => {
-    setHistory((past) => {
-      const current = past[past.length - 1]
-      if (current.status !== 'playing' || current.current !== HUMAN) return past
+    setLog((prev) => {
+      const current = prev.states[prev.states.length - 1]
+      if (current.status !== 'playing' || current.current !== HUMAN) return prev
       const next = playMove(current, row, col)
-      return next === current ? past : [...past, next]
+      if (next === current) return prev
+      return {
+        states: [...prev.states, next],
+        moves: [...prev.moves, { player: HUMAN, move: { row, col } }],
+      }
     })
   }, [])
 
-  const handleRestart = useCallback(() => setHistory([createGame()]), [])
+  const handleRestart = useCallback(() => setLog(newGameLog()), [])
 
-  // Changing the difficulty starts a fresh game so each game is played
+  // Changing the difficulty starts a fresh game, so each game is played
   // entirely against one opponent.
   const handleSelectDifficulty = useCallback((level: DifficultyLevel) => {
     setDifficulty(level)
-    setHistory([createGame()])
+    setLog(newGameLog())
   }, [])
 
   const score = countDiscs(game.board)
   const evaluation = evaluateBoard(game.board)
+
   const evalHistory = useMemo(
-    () => history.map((state) => evaluateBoard(state.board)),
-    [history],
+    () => log.states.map((state) => evaluateBoard(state.board)),
+    [log],
   )
+
+  // The coach's comment on the player's most recent move.
+  const comment = useMemo<MoveComment | null>(() => {
+    for (let i = log.moves.length - 1; i >= 0; i--) {
+      if (log.moves[i].player === HUMAN) {
+        return commentOnMove(log.states[i].board, HUMAN, log.moves[i].move)
+      }
+    }
+    return null
+  }, [log])
+
   const humanCanInteract = game.status === 'playing' && game.current === HUMAN
 
   return (
@@ -105,7 +140,11 @@ export default function App() {
 
       <StatusMessage game={game} />
 
+      <MoveCommentCard comment={comment} />
+
       <ScoreChart values={evalHistory} />
+
+      <MoveLog moves={log.moves} />
 
       <button className="restart" type="button" onClick={handleRestart}>
         最初から
