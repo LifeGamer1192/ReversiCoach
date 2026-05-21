@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import './App.css'
+import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
-import { chooseRandomMove } from './engine/ai'
+import { chooseGreedyMove } from './engine/ai'
 import { countDiscs } from './engine/board'
+import { evaluateBoard } from './engine/evaluation'
 import { createGame, getWinner, playMove, type GameState } from './engine/game'
 import type { Player } from './engine/types'
 
@@ -21,13 +23,13 @@ const PLAYER_LABEL: Record<Player, string> = {
 export default function App() {
   const [game, setGame] = useState<GameState>(createGame)
 
-  // Drive the AI: on its turn, play a random legal move after a short delay.
+  // Drive the AI: on its turn, play the highest-scoring move after a short delay.
   useEffect(() => {
     if (game.status !== 'playing' || game.current !== AI) return
     const timer = setTimeout(() => {
       setGame((current) => {
         if (current.status !== 'playing' || current.current !== AI) return current
-        const move = chooseRandomMove(current.board, AI)
+        const move = chooseGreedyMove(current.board, AI)
         return move ? playMove(current, move.row, move.col) : current
       })
     }, AI_DELAY_MS)
@@ -44,6 +46,7 @@ export default function App() {
   const handleRestart = useCallback(() => setGame(createGame()), [])
 
   const score = countDiscs(game.board)
+  const evaluation = evaluateBoard(game.board)
   const humanCanInteract = game.status === 'playing' && game.current === HUMAN
 
   return (
@@ -62,6 +65,8 @@ export default function App() {
           </div>
         ))}
       </section>
+
+      <AdvantageBar score={evaluation} />
 
       <Board
         board={game.board}
