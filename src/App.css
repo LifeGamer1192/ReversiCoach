@@ -140,6 +140,14 @@
   color: #ff9e80;
 }
 
+/* --- start gate (後手で対局開始を待つ) --- */
+.startgate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 /* --- control buttons --- */
 .controls {
   display: flex;

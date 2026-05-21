@@ -50,13 +50,16 @@ export default function App() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
   const [guideEnabled, setGuideEnabled] = useState(false)
   const [log, setLog] = useState<GameLog>(newGameLog)
+  // When the human plays second, the game waits on a "start" press so the AI
+  // does not move on its own the instant 後手 is chosen.
+  const [started, setStarted] = useState(true)
 
   const aiColor = opponent(humanColor)
   const game = log.states[log.states.length - 1]
 
   // Drive the AI: on its turn, search for a move and play it after a short delay.
   useEffect(() => {
-    if (game.status !== 'playing' || game.current !== aiColor) return
+    if (!started || game.status !== 'playing' || game.current !== aiColor) return
     const timer = setTimeout(() => {
       setLog((prev) => {
         const current = prev.states[prev.states.length - 1]
@@ -72,7 +75,7 @@ export default function App() {
       })
     }, AI_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [game, aiColor, difficulty])
+  }, [game, aiColor, difficulty, started])
 
   const handleCellClick = useCallback(
     (row: number, col: number) => {
@@ -90,7 +93,17 @@ export default function App() {
     [humanColor],
   )
 
-  const handleRestart = useCallback(() => setLog(newGameLog()), [])
+  // Start a fresh game. It begins immediately when the human plays first
+  // (先手); when the human is 後手, it waits for the "対局開始" press.
+  const startFreshGame = useCallback((color: Player) => {
+    setLog(newGameLog())
+    setStarted(color === 'black')
+  }, [])
+
+  const handleRestart = useCallback(
+    () => startFreshGame(humanColor),
+    [startFreshGame, humanColor],
+  )
 
   // Undo: revert to the position just before the player's most recent move,
   // discarding that move and the AI's reply so the player can choose again.
@@ -111,16 +124,22 @@ export default function App() {
     })
   }, [humanColor])
 
-  const handleSelectDifficulty = useCallback((level: DifficultyLevel) => {
-    setDifficulty(level)
-    setLog(newGameLog())
-  }, [])
+  const handleSelectDifficulty = useCallback(
+    (level: DifficultyLevel) => {
+      setDifficulty(level)
+      startFreshGame(humanColor)
+    },
+    [startFreshGame, humanColor],
+  )
 
   // Changing the side starts a fresh game.
-  const handleSelectColor = useCallback((color: Player) => {
-    setHumanColor(color)
-    setLog(newGameLog())
-  }, [])
+  const handleSelectColor = useCallback(
+    (color: Player) => {
+      setHumanColor(color)
+      startFreshGame(color)
+    },
+    [startFreshGame],
+  )
 
   const score = countDiscs(game.board)
   const evaluation = evaluateBoard(game.board)
@@ -140,7 +159,8 @@ export default function App() {
     return null
   }, [log, humanColor])
 
-  const humanCanInteract = game.status === 'playing' && game.current === humanColor
+  const humanCanInteract =
+    started && game.status === 'playing' && game.current === humanColor
 
   // Guide mode: grade the player's options so the hints can be colour-coded.
   const guide = useMemo<GradedMove[] | null>(() => {
@@ -186,7 +206,22 @@ export default function App() {
 
       {guide ? <GuideLegend /> : null}
 
-      <StatusMessage game={game} humanColor={humanColor} />
+      {started ? (
+        <StatusMessage game={game} humanColor={humanColor} />
+      ) : (
+        <div className="startgate">
+          <p className="status">
+            後手（白）です。「対局開始」を押すと AI が先に着手します。
+          </p>
+          <button
+            className="ctrl-btn ctrl-btn--primary"
+            type="button"
+            onClick={() => setStarted(true)}
+          >
+            対局開始
+          </button>
+        </div>
+      )}
 
       <MoveCommentCard comment={comment} />
 
