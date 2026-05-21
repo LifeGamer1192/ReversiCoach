@@ -531,3 +531,73 @@
   margin: 3px 0;
   line-height: 1.55;
 }
+
+/* --- character (opponent) selector --- */
+.chars {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chars__label {
+  font-size: 0.82rem;
+  color: #9aa0a6;
+}
+
+.chars__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 4px;
+  border: 1px solid #3a4049;
+  border-radius: 8px;
+  background: #262b32;
+  color: #cfd3d8;
+  cursor: pointer;
+}
+
+.char:hover {
+  background: #2f353d;
+}
+
+.char.is-selected {
+  background: #2e7d32;
+  border-color: #4caf50;
+}
+
+.char__emoji {
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.char__name {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.char.is-selected .char__name {
+  color: #ffffff;
+}
+
+.char__depth {
+  font-size: 0.64rem;
+  color: #9aa0a6;
+}
+
+.char.is-selected .char__depth {
+  color: #c8e6c9;
+}
+
+.chars__tagline {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #cfd3d8;
+}

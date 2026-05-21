@@ -22,6 +22,7 @@
 - **V3 実装済み** — AI が最大2手先を読む negamax 探索に進化。難易度選択（ランダム／1手読み／2手読み）と、評価値の推移グラフを追加。
 - **V4 実装済み** — AI が最大3手先まで探索。プレイヤーの各手にコーチがコメント（最善手・疑問手など、約3行）。着手ログを追加。
 - **V5 実装済み** — AI が最大4手先まで探索（α-β枝刈りを導入）。対局終了後、棋譜を解析した約15行の詳細レビューを表示。
+- **V6 実装済み** — AI が最大5手先まで探索。難易度選択を、コミカルな6キャラクター（きまぐれネコ〜リバーシ王）から選ぶ形式に刷新。**ロードマップ全6バージョン完了。**
 - **追加機能** — 手番選択（先手＝黒／後手＝白）、ガイドモード（次の手の良し悪しを色分け表示・デフォルトはオフ）、一手戻す。
 
 ## 技術スタック
@@ -62,7 +63,7 @@ src/
   components/
     Board.tsx             盤面の表示
     AdvantageBar.tsx      有利度バーの表示
-    DifficultySelector.tsx  難易度選択
+    CharacterSelector.tsx 対戦キャラ（難易度）選択
     ColorSelector.tsx     手番（先手/後手）選択
     GuideToggle.tsx       ガイドモードの切替
     GuideLegend.tsx       ガイドの色の凡例
@@ -70,7 +71,7 @@ src/
     MoveCommentCard.tsx   コーチのコメント表示
     GameAnalysisCard.tsx  対局後の詳細レビュー表示
     MoveLog.tsx           着手ログの表示
-  difficulty.ts           難易度（探索深さ）の定義
+  difficulty.ts           対戦キャラ（探索深さ）の定義
   game-log.ts             着手記録の型
   App.tsx                 画面全体・対局進行
   main.tsx                エントリーポイント

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
+import { CharacterSelector } from './components/CharacterSelector'
 import { ColorSelector } from './components/ColorSelector'
-import { DifficultySelector } from './components/DifficultySelector'
 import { GameAnalysisCard } from './components/GameAnalysisCard'
 import { GuideLegend } from './components/GuideLegend'
 import { GuideToggle } from './components/GuideToggle'
@@ -29,11 +29,10 @@ import type { MovePlay } from './game-log'
 /** Pause before the AI moves, so its turn is visible to the player. */
 const AI_DELAY_MS = 600
 
-/** Display label for a disc colour, noting whether it is the human or AI. */
+/** Scoreboard label for a disc colour (the AI side just reads "AI"). */
 function playerLabel(color: Player, humanColor: Player): string {
   const name = color === 'black' ? '黒' : '白'
-  const role = color === humanColor ? 'あなた' : 'AI'
-  return `${name}（${role}）`
+  return `${name}（${color === humanColor ? 'あなた' : 'AI'}）`
 }
 
 /** The game played so far: every state, and every move that produced one. */
@@ -58,6 +57,7 @@ export default function App() {
   const [started, setStarted] = useState(true)
 
   const aiColor = opponent(humanColor)
+  const aiName = `${difficulty.emoji}${difficulty.name}`
   const game = log.states[log.states.length - 1]
 
   // Drive the AI: on its turn, search for a move and play it after a short delay.
@@ -188,7 +188,7 @@ export default function App() {
       <h1 className="app__title">ReversiCoach</h1>
 
       <ColorSelector selected={humanColor} onSelect={handleSelectColor} />
-      <DifficultySelector
+      <CharacterSelector
         selectedId={difficulty.id}
         onSelect={handleSelectDifficulty}
       />
@@ -220,11 +220,11 @@ export default function App() {
       {guide ? <GuideLegend /> : null}
 
       {started ? (
-        <StatusMessage game={game} humanColor={humanColor} />
+        <StatusMessage game={game} humanColor={humanColor} aiName={aiName} />
       ) : (
         <div className="startgate">
           <p className="status">
-            後手（白）です。「対局開始」を押すと AI が先に着手します。
+            後手（白）です。「対局開始」を押すと {aiName} が先に着手します。
           </p>
           <button
             className="ctrl-btn ctrl-btn--primary"
@@ -269,29 +269,33 @@ export default function App() {
 function StatusMessage({
   game,
   humanColor,
+  aiName,
 }: {
   game: GameState
   humanColor: Player
+  aiName: string
 }) {
+  const sideName = (color: Player) => (color === humanColor ? 'あなた' : aiName)
+
   if (game.status === 'finished') {
     const winner = getWinner(game.board)
     const text =
       winner === 'draw'
         ? '引き分けです。'
-        : `${playerLabel(winner, humanColor)} の勝ちです！`
+        : `${sideName(winner)} の勝ちです！`
     return <p className="status status--result">対局終了 — {text}</p>
   }
 
   const turnText =
     game.current === humanColor
       ? 'あなたの番です。石を置く場所を選んでください。'
-      : 'AI が考えています…'
+      : `${aiName} が考えています…`
 
   return (
     <p className="status">
       {game.passedPlayer ? (
         <span className="status__pass">
-          {playerLabel(game.passedPlayer, humanColor)} は打てる場所がなくパスしました。{' '}
+          {sideName(game.passedPlayer)} は打てる場所がなくパスしました。{' '}
         </span>
       ) : null}
       {turnText}
