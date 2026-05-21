@@ -2,6 +2,8 @@
 
 リバーシ（オセロ）の上達を支援するゲーム。プレイしながら盤面評価やAIのコメントを通じて、手筋を学べることを目指します。
 
+**公開URL**: <https://lifegamer1192.github.io/ReversiCoach/>（`main` ブランチへの push で GitHub Actions が自動デプロイ）
+
 ## ロードマップ
 
 | バージョン | 内容 |
