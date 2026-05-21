@@ -10,16 +10,16 @@ interface DifficultySelectorProps {
 /** A row of buttons for choosing the AI difficulty (its search depth). */
 export function DifficultySelector({ selectedId, onSelect }: DifficultySelectorProps) {
   return (
-    <section className="difficulty" aria-label="難易度">
-      <span className="difficulty__label">難易度</span>
-      <div className="difficulty__options">
+    <section className="picker" aria-label="難易度">
+      <span className="picker__label">難易度</span>
+      <div className="picker__options">
         {DIFFICULTY_LEVELS.map((level) => {
           const selected = level.id === selectedId
           return (
             <button
               key={level.id}
               type="button"
-              className={`difficulty__btn${selected ? ' is-selected' : ''}`}
+              className={`picker__btn${selected ? ' is-selected' : ''}`}
               aria-pressed={selected}
               onClick={() => onSelect(level)}
             >

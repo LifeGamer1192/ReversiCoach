@@ -214,27 +214,27 @@
   background: #4caf50;
 }
 
-/* --- difficulty selector --- */
-.difficulty {
+/* --- picker rows (手番 / 難易度) --- */
+.picker {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.difficulty__label {
+.picker__label {
   font-size: 0.82rem;
   color: #9aa0a6;
   white-space: nowrap;
 }
 
-.difficulty__options {
+.picker__options {
   display: flex;
   flex: 1;
   gap: 6px;
 }
 
-.difficulty__btn {
+.picker__btn {
   flex: 1;
   padding: 6px 4px;
   border: 1px solid #3a4049;
@@ -245,11 +245,11 @@
   cursor: pointer;
 }
 
-.difficulty__btn:hover {
+.picker__btn:hover {
   background: #2f353d;
 }
 
-.difficulty__btn.is-selected {
+.picker__btn.is-selected {
   background: #4caf50;
   border-color: #4caf50;
   color: #07210d;

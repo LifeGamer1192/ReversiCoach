@@ -16,5 +16,5 @@ export const DIFFICULTY_LEVELS: readonly DifficultyLevel[] = [
   { id: 'look3', label: '3手読み', depth: 3 },
 ]
 
-/** Difficulty selected when the app first loads. */
-export const DEFAULT_DIFFICULTY: DifficultyLevel = DIFFICULTY_LEVELS[3]
+/** Difficulty selected when the app first loads (1手読み). */
+export const DEFAULT_DIFFICULTY: DifficultyLevel = DIFFICULTY_LEVELS[1]
