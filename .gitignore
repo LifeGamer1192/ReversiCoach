@@ -1,0 +1,30 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Logs / local data
+*.log
+.env
+.env.local
