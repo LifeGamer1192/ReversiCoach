@@ -114,3 +114,36 @@ export function commentOnMove(
 
   return { verdict, tone, lines }
 }
+
+/** A quality grade for a candidate move, best to worst. */
+export type MoveGrade = 'best' | 'good' | 'fair' | 'poor'
+
+/** A legal move paired with its quality grade. */
+export interface GradedMove {
+  move: Position
+  grade: MoveGrade
+}
+
+/**
+ * Grade every legal move for `player` by quality, for guide mode.
+ * Uses the same search depth as the move comments.
+ */
+export function gradeMoves(board: Board, player: Player): GradedMove[] {
+  const scored = scoreMoves(board, player, COMMENT_DEPTH)
+  if (scored.length === 0) return []
+
+  let bestScore = -Infinity
+  for (const { score } of scored) {
+    if (score > bestScore) bestScore = score
+  }
+
+  return scored.map(({ move, score }) => {
+    const loss = bestScore - score
+    let grade: MoveGrade
+    if (loss <= 0) grade = 'best'
+    else if (loss <= 15) grade = 'good'
+    else if (loss <= 40) grade = 'fair'
+    else grade = 'poor'
+    return { move, grade }
+  })
+}

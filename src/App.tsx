@@ -4,13 +4,20 @@ import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
 import { ColorSelector } from './components/ColorSelector'
 import { DifficultySelector } from './components/DifficultySelector'
+import { GuideLegend } from './components/GuideLegend'
+import { GuideToggle } from './components/GuideToggle'
 import { MoveCommentCard } from './components/MoveCommentCard'
 import { MoveLog } from './components/MoveLog'
 import { ScoreChart } from './components/ScoreChart'
 import { DEFAULT_DIFFICULTY, type DifficultyLevel } from './difficulty'
 import { chooseAiMove } from './engine/ai'
 import { countDiscs, opponent } from './engine/board'
-import { commentOnMove, type MoveComment } from './engine/coach'
+import {
+  commentOnMove,
+  gradeMoves,
+  type GradedMove,
+  type MoveComment,
+} from './engine/coach'
 import { evaluateBoard } from './engine/evaluation'
 import { createGame, getWinner, playMove, type GameState } from './engine/game'
 import type { Player } from './engine/types'
@@ -41,6 +48,7 @@ function newGameLog(): GameLog {
 export default function App() {
   const [humanColor, setHumanColor] = useState<Player>('black')
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
+  const [guideEnabled, setGuideEnabled] = useState(false)
   const [log, setLog] = useState<GameLog>(newGameLog)
 
   const aiColor = opponent(humanColor)
@@ -84,6 +92,25 @@ export default function App() {
 
   const handleRestart = useCallback(() => setLog(newGameLog()), [])
 
+  // Undo: revert to the position just before the player's most recent move,
+  // discarding that move and the AI's reply so the player can choose again.
+  const handleUndo = useCallback(() => {
+    setLog((prev) => {
+      let lastHuman = -1
+      for (let i = prev.moves.length - 1; i >= 0; i--) {
+        if (prev.moves[i].player === humanColor) {
+          lastHuman = i
+          break
+        }
+      }
+      if (lastHuman < 0) return prev
+      return {
+        states: prev.states.slice(0, lastHuman + 1),
+        moves: prev.moves.slice(0, lastHuman),
+      }
+    })
+  }, [humanColor])
+
   const handleSelectDifficulty = useCallback((level: DifficultyLevel) => {
     setDifficulty(level)
     setLog(newGameLog())
@@ -115,6 +142,14 @@ export default function App() {
 
   const humanCanInteract = game.status === 'playing' && game.current === humanColor
 
+  // Guide mode: grade the player's options so the hints can be colour-coded.
+  const guide = useMemo<GradedMove[] | null>(() => {
+    if (!guideEnabled || !humanCanInteract) return null
+    return gradeMoves(game.board, humanColor)
+  }, [guideEnabled, humanCanInteract, game, humanColor])
+
+  const canUndo = log.moves.some((m) => m.player === humanColor)
+
   return (
     <main className="app">
       <h1 className="app__title">ReversiCoach</h1>
@@ -124,6 +159,7 @@ export default function App() {
         selectedId={difficulty.id}
         onSelect={handleSelectDifficulty}
       />
+      <GuideToggle enabled={guideEnabled} onChange={setGuideEnabled} />
 
       <section className="scoreboard">
         {(['black', 'white'] as const).map((color) => (
@@ -144,8 +180,11 @@ export default function App() {
         board={game.board}
         legalMoves={humanCanInteract ? game.legalMoves : []}
         interactive={humanCanInteract}
+        guide={guide}
         onCellClick={handleCellClick}
       />
+
+      {guide ? <GuideLegend /> : null}
 
       <StatusMessage game={game} humanColor={humanColor} />
 
@@ -155,9 +194,23 @@ export default function App() {
 
       <MoveLog moves={log.moves} />
 
-      <button className="restart" type="button" onClick={handleRestart}>
-        最初から
-      </button>
+      <div className="controls">
+        <button
+          className="ctrl-btn"
+          type="button"
+          onClick={handleUndo}
+          disabled={!canUndo}
+        >
+          一手戻す
+        </button>
+        <button
+          className="ctrl-btn ctrl-btn--primary"
+          type="button"
+          onClick={handleRestart}
+        >
+          最初から
+        </button>
+      </div>
     </main>
   )
 }

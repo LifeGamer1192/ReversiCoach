@@ -1,4 +1,5 @@
 import { BOARD_SIZE, idx } from '../engine/board'
+import type { GradedMove } from '../engine/coach'
 import type { Board as BoardModel, Position } from '../engine/types'
 
 interface BoardProps {
@@ -7,12 +8,23 @@ interface BoardProps {
   legalMoves: Position[]
   /** Whether the player can currently click cells. */
   interactive: boolean
+  /** When set, legal-move hints are colour-coded by quality (guide mode). */
+  guide: GradedMove[] | null
   onCellClick: (row: number, col: number) => void
 }
 
 /** The 8x8 reversi board, rendered as a CSS grid of cell buttons. */
-export function Board({ board, legalMoves, interactive, onCellClick }: BoardProps) {
+export function Board({
+  board,
+  legalMoves,
+  interactive,
+  guide,
+  onCellClick,
+}: BoardProps) {
   const legalSet = new Set(legalMoves.map((m) => idx(m.row, m.col)))
+  const gradeByCell = new Map(
+    (guide ?? []).map((g) => [idx(g.move.row, g.move.col), g.grade] as const),
+  )
 
   return (
     <div className="board">
@@ -20,6 +32,7 @@ export function Board({ board, legalMoves, interactive, onCellClick }: BoardProp
         const row = Math.floor(i / BOARD_SIZE)
         const col = i % BOARD_SIZE
         const playable = interactive && legalSet.has(i)
+        const grade = gradeByCell.get(i)
         return (
           <button
             key={i}
@@ -32,7 +45,9 @@ export function Board({ board, legalMoves, interactive, onCellClick }: BoardProp
             {cell ? (
               <span className={`disc disc--${cell}`} />
             ) : (
-              playable && <span className="hint" />
+              playable && (
+                <span className={`hint${grade ? ` hint--${grade}` : ''}`} />
+              )
             )}
           </button>
         )

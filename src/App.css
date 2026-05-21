@@ -140,19 +140,39 @@
   color: #ff9e80;
 }
 
-/* --- restart button --- */
-.restart {
-  padding: 10px 24px;
-  border: none;
+/* --- control buttons --- */
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+.ctrl-btn {
+  padding: 10px 20px;
+  border: 1px solid #3a4049;
   border-radius: 8px;
-  background: #4caf50;
-  color: #07210d;
+  background: #262b32;
+  color: #cfd3d8;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
 }
 
-.restart:hover {
+.ctrl-btn:hover:not(:disabled) {
+  background: #2f353d;
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ctrl-btn--primary {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: #07210d;
+}
+
+.ctrl-btn--primary:hover:not(:disabled) {
   background: #5cc35f;
 }
 
@@ -415,4 +435,69 @@
 
 .movelog__square {
   font-variant-numeric: tabular-nums;
+}
+
+/* --- guide-mode hints (colour-coded by move quality) --- */
+.hint--best,
+.hint--good,
+.hint--fair,
+.hint--poor {
+  width: 42%;
+  height: 42%;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.hint--best {
+  background: #00e676;
+}
+
+.hint--good {
+  background: #c0ca33;
+}
+
+.hint--fair {
+  background: #ffa726;
+}
+
+.hint--poor {
+  background: #ff5252;
+}
+
+/* --- guide legend --- */
+.legend {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 0.78rem;
+  color: #cfd3d8;
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.4);
+}
+
+.legend__dot--best {
+  background: #00e676;
+}
+
+.legend__dot--good {
+  background: #c0ca33;
+}
+
+.legend__dot--fair {
+  background: #ffa726;
+}
+
+.legend__dot--poor {
+  background: #ff5252;
 }
