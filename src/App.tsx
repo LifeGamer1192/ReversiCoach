@@ -4,6 +4,7 @@ import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
 import { ColorSelector } from './components/ColorSelector'
 import { DifficultySelector } from './components/DifficultySelector'
+import { GameAnalysisCard } from './components/GameAnalysisCard'
 import { GuideLegend } from './components/GuideLegend'
 import { GuideToggle } from './components/GuideToggle'
 import { MoveCommentCard } from './components/MoveCommentCard'
@@ -13,8 +14,10 @@ import { DEFAULT_DIFFICULTY, type DifficultyLevel } from './difficulty'
 import { chooseAiMove } from './engine/ai'
 import { countDiscs, opponent } from './engine/board'
 import {
+  analyzeGame,
   commentOnMove,
   gradeMoves,
+  type GameAnalysis,
   type GradedMove,
   type MoveComment,
 } from './engine/coach'
@@ -159,6 +162,16 @@ export default function App() {
     return null
   }, [log, humanColor])
 
+  // The detailed review, produced once the game is finished.
+  const analysis = useMemo<GameAnalysis | null>(() => {
+    if (game.status !== 'finished') return null
+    return analyzeGame(
+      log.states.map((state) => state.board),
+      log.moves,
+      humanColor,
+    )
+  }, [game.status, log, humanColor])
+
   const humanCanInteract =
     started && game.status === 'playing' && game.current === humanColor
 
@@ -222,6 +235,8 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {analysis ? <GameAnalysisCard analysis={analysis} /> : null}
 
       <MoveCommentCard comment={comment} />
 

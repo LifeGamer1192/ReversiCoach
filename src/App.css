@@ -509,3 +509,25 @@
 .legend__dot--poor {
   background: #ff5252;
 }
+
+/* --- post-game analysis --- */
+.analysis {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #20262e;
+  border: 1px solid #3a4049;
+  font-size: 0.84rem;
+}
+
+.analysis__title {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.analysis__line {
+  margin: 3px 0;
+  line-height: 1.55;
+}

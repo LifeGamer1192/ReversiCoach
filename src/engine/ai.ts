@@ -1,5 +1,5 @@
-import { applyMove, legalMoves, opponent } from './board'
-import { evaluateFor } from './evaluation'
+import { applyMove, idx, legalMoves, opponent } from './board'
+import { evaluateFor, POSITION_WEIGHTS } from './evaluation'
 import type { Board, Player, Position } from './types'
 
 /**
@@ -17,12 +17,19 @@ export function chooseRandomMove(
 }
 
 /**
- * Negamax search: the best score `player` can achieve when it is their
- * turn on `board`, looking `depth` plies ahead. A pass (no legal move)
- * hands the turn over without consuming depth; if neither side can move
- * the game is over and the static evaluation is returned.
+ * Negamax search with alpha-beta pruning: the best score `player` can
+ * achieve on `board`, looking `depth` plies ahead. Moves are tried in
+ * descending square value to make pruning more effective. A pass (no
+ * legal move) hands the turn over without consuming depth; if neither
+ * side can move the game is over and the static evaluation is returned.
  */
-function negamax(board: Board, player: Player, depth: number): number {
+function alphabeta(
+  board: Board,
+  player: Player,
+  depth: number,
+  alpha: number,
+  beta: number,
+): number {
   if (depth <= 0) return evaluateFor(board, player)
 
   const moves = legalMoves(board, player)
@@ -31,14 +38,21 @@ function negamax(board: Board, player: Player, depth: number): number {
     if (legalMoves(board, foe).length === 0) {
       return evaluateFor(board, player)
     }
-    return -negamax(board, foe, depth)
+    return -alphabeta(board, foe, depth, -beta, -alpha)
   }
+
+  moves.sort(
+    (a, b) =>
+      POSITION_WEIGHTS[idx(b.row, b.col)] - POSITION_WEIGHTS[idx(a.row, a.col)],
+  )
 
   let best = -Infinity
   for (const move of moves) {
     const next = applyMove(board, player, move.row, move.col)
-    const score = -negamax(next, opponent(player), depth - 1)
+    const bound = Math.max(alpha, best)
+    const score = -alphabeta(next, opponent(player), depth - 1, -beta, -bound)
     if (score > best) best = score
+    if (best >= beta) break
   }
   return best
 }
@@ -51,7 +65,8 @@ export interface MoveScore {
 
 /**
  * Score every legal move for `player` by searching `depth` plies ahead
- * (a depth below 1 is treated as 1). Higher scores are better for `player`.
+ * (a depth below 1 is treated as 1). Each move is searched with a full
+ * window, so the returned scores are exact. Higher is better for `player`.
  */
 export function scoreMoves(
   board: Board,
@@ -61,7 +76,16 @@ export function scoreMoves(
   const searchDepth = Math.max(1, depth)
   return legalMoves(board, player).map((move) => {
     const next = applyMove(board, player, move.row, move.col)
-    return { move, score: -negamax(next, opponent(player), searchDepth - 1) }
+    return {
+      move,
+      score: -alphabeta(
+        next,
+        opponent(player),
+        searchDepth - 1,
+        -Infinity,
+        Infinity,
+      ),
+    }
   })
 }
 
@@ -89,7 +113,7 @@ export function chooseMinimaxMove(
 
 /**
  * Pick the AI's move for the given search depth: depth 0 plays at random,
- * depth >= 1 runs a negamax search of that depth.
+ * depth >= 1 runs an alpha-beta search of that depth.
  */
 export function chooseAiMove(
   board: Board,

@@ -14,6 +14,7 @@ export const DIFFICULTY_LEVELS: readonly DifficultyLevel[] = [
   { id: 'look1', label: '1手読み', depth: 1 },
   { id: 'look2', label: '2手読み', depth: 2 },
   { id: 'look3', label: '3手読み', depth: 3 },
+  { id: 'look4', label: '4手読み', depth: 4 },
 ]
 
 /** Difficulty selected when the app first loads (1手読み). */
