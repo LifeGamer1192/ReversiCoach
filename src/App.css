@@ -609,3 +609,69 @@
   color: #ffca28;
   vertical-align: top;
 }
+
+.undo-mark {
+  margin-left: 4px;
+  font-size: 0.6rem;
+  color: #9aa0a6;
+  vertical-align: top;
+}
+
+.picker__btn--warn {
+  background: #4a3a12;
+  border-color: #c9941a;
+  color: #ffd54f;
+  font-weight: 700;
+}
+
+.picker__btn--warn:hover {
+  background: #5a4717;
+}
+
+/* --- record (戦績) panel --- */
+.record {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #20262e;
+  font-size: 0.8rem;
+}
+
+.record__title {
+  font-weight: 700;
+  color: #9aa0a6;
+}
+
+.record__item b {
+  font-size: 1rem;
+  color: #66bb6a;
+  font-variant-numeric: tabular-nums;
+}
+
+.record__item--muted {
+  margin-left: auto;
+  color: #9aa0a6;
+}
+
+/* --- assist line in the post-game review --- */
+.analysis__assist {
+  margin: 4px 0 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.analysis__assist.is-clean {
+  background: #1f3a22;
+  color: #81c784;
+}
+
+.analysis__assist.is-assisted {
+  background: #3a2f12;
+  color: #ffca28;
+}

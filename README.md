@@ -25,6 +25,7 @@
 - **V6 実装済み** — AI が最大5手先まで探索。難易度選択を、コミカルな6キャラクター（きまぐれネコ〜リバーシ王）から選ぶ形式に刷新。**ロードマップ全6バージョン完了。**
 - **改善** — 評価ロジックを強化（安定石・フロンティア石・終盤重みを追加）。ガイド/コーチは5手先読み＋終盤完全読みで、最善手の判定精度を向上。
 - **追加機能** — 手番選択（先手＝黒／後手＝白）、ガイドモード（次の手の良し悪しを色分け表示・デフォルトはオフ）、一手戻す。
+- **チート対策** — 待った回数の表示、真剣勝負モード（全アシスト無効）、対局記録と戦績（localStorage 保存）、ガイド使用時の確認。
 
 ## 技術スタック
 
@@ -66,14 +67,17 @@ src/
     AdvantageBar.tsx      有利度バーの表示
     CharacterSelector.tsx 対戦キャラ（難易度）選択
     ColorSelector.tsx     手番（先手/後手）選択
-    GuideToggle.tsx       ガイドモードの切替
+    GuideToggle.tsx       ガイドモードの切替・アシスト使用マーク
     GuideLegend.tsx       ガイドの色の凡例
+    ModeSelector.tsx      通常／真剣勝負モードの切替
     ScoreChart.tsx        評価値の推移グラフ
     MoveCommentCard.tsx   コーチのコメント表示
     GameAnalysisCard.tsx  対局後の詳細レビュー表示
     MoveLog.tsx           着手ログの表示
+    RecordPanel.tsx       戦績の表示
   difficulty.ts           対戦キャラ（探索深さ）の定義
   game-log.ts             着手記録の型
+  game-records.ts         対局結果の記録（localStorage）
   App.tsx                 画面全体・対局進行
   main.tsx                エントリーポイント
 ```
