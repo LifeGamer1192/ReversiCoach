@@ -3,8 +3,17 @@ import { countDiscs, idx } from './board'
 import { evaluateFor } from './evaluation'
 import type { Board, Player, Position } from './types'
 
-/** Search depth the coach uses when judging a move's quality. */
-const COMMENT_DEPTH = 3
+/** Search depth for the live guide and per-move coach comments. */
+const GUIDE_DEPTH = 5
+
+/** Search depth for the (longer) post-game analysis sweep. */
+const ANALYSIS_BASE_DEPTH = 4
+
+/**
+ * At or below this many empty squares, the coach searches all the way to
+ * the end of the game, so the best move is determined exactly.
+ */
+const ENDGAME_EXACT_EMPTIES = 10
 
 const CORNER_SET = new Set<number>([
   idx(0, 0), idx(0, 7), idx(7, 0), idx(7, 7),
@@ -23,6 +32,16 @@ const NEAR_CORNER = new Map<number, number>([
   [idx(6, 6), idx(7, 7)], [idx(6, 7), idx(7, 7)], [idx(7, 6), idx(7, 7)],
 ])
 
+/**
+ * Search depth to use for a position: an exact solve to the end of the
+ * game once few empties remain, otherwise the given base depth.
+ */
+function analysisDepth(board: Board, baseDepth: number): number {
+  const { black, white } = countDiscs(board)
+  const empties = 64 - black - white
+  return empties <= ENDGAME_EXACT_EMPTIES ? Math.max(1, empties) : baseDepth
+}
+
 /** How good a move was, plus a short explanation for the player. */
 export interface MoveComment {
   /** A one-word verdict, e.g. 好手 / 疑問手. */
@@ -40,8 +59,8 @@ function formatSquare(pos: Position): string {
 /** Classify a move's loss (vs the best move) into a quality grade. */
 function gradeOf(loss: number): MoveGrade {
   if (loss <= 0) return 'best'
-  if (loss <= 15) return 'good'
-  if (loss <= 40) return 'fair'
+  if (loss <= 24) return 'good'
+  if (loss <= 64) return 'fair'
   return 'poor'
 }
 
@@ -54,7 +73,8 @@ export function commentOnMove(
   player: Player,
   move: Position,
 ): MoveComment {
-  const scored = scoreMoves(boardBefore, player, COMMENT_DEPTH)
+  const depth = analysisDepth(boardBefore, GUIDE_DEPTH)
+  const scored = scoreMoves(boardBefore, player, depth)
   const sortedDesc = [...scored].sort((a, b) => b.score - a.score)
   const movedIdx = idx(move.row, move.col)
 
@@ -70,13 +90,13 @@ export function commentOnMove(
   if (loss <= 0) {
     verdict = '最善手'
     tone = 'good'
-  } else if (loss <= 15) {
+  } else if (loss <= 24) {
     verdict = '好手'
     tone = 'good'
-  } else if (loss <= 40) {
+  } else if (loss <= 64) {
     verdict = 'まずまず'
     tone = 'mid'
-  } else if (loss <= 90) {
+  } else if (loss <= 145) {
     verdict = '疑問手'
     tone = 'bad'
   } else {
@@ -134,11 +154,12 @@ export interface GradedMove {
 }
 
 /**
- * Grade every legal move for `player` by quality, for guide mode.
- * Uses the same search depth as the move comments.
+ * Grade every legal move for `player` by quality, for guide mode. Searches
+ * deeply (and solves the endgame exactly) so the best move is accurate.
  */
 export function gradeMoves(board: Board, player: Player): GradedMove[] {
-  const scored = scoreMoves(board, player, COMMENT_DEPTH)
+  const depth = analysisDepth(board, GUIDE_DEPTH)
+  const scored = scoreMoves(board, player, depth)
   if (scored.length === 0) return []
 
   let bestScore = -Infinity
@@ -151,9 +172,6 @@ export function gradeMoves(board: Board, player: Player): GradedMove[] {
     grade: gradeOf(bestScore - score),
   }))
 }
-
-/** Search depth used for the post-game analysis. */
-const ANALYSIS_DEPTH = 3
 
 /** A detailed post-game review of the player's moves. */
 export interface GameAnalysis {
@@ -186,7 +204,11 @@ export function analyzeGame(
     if (moves[i].player !== humanColor) continue
     const board = boards[i]
     const { move } = moves[i]
-    const scored = scoreMoves(board, humanColor, ANALYSIS_DEPTH)
+    const scored = scoreMoves(
+      board,
+      humanColor,
+      analysisDepth(board, ANALYSIS_BASE_DEPTH),
+    )
     if (scored.length === 0) continue
     const sorted = [...scored].sort((a, b) => b.score - a.score)
     const movedIdx = idx(move.row, move.col)
@@ -243,7 +265,7 @@ export function analyzeGame(
   }
 
   const worst = stats.reduce((a, b) => (b.loss > a.loss ? b : a))
-  if (worst.loss > 20) {
+  if (worst.loss > 30) {
     lines.push(
       `最も評価を落としたのは ${worst.ply} 手目（${formatSquare(worst.square)}）で、約 ${worst.loss} 点の損でした。`,
     )

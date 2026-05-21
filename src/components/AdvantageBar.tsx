@@ -1,13 +1,13 @@
 /** Maps the raw evaluation onto the bar via tanh; larger = less sensitive. */
-const BAR_SCALE = 90
+const BAR_SCALE = 150
 
 /** A short verdict in Japanese for the given signed evaluation. */
 function advantageLabel(score: number): string {
   const magnitude = Math.abs(score)
-  if (magnitude < 12) return '互角'
+  if (magnitude < 22) return '互角'
   const side = score > 0 ? '黒' : '白'
-  if (magnitude < 50) return `${side} やや有利`
-  if (magnitude < 130) return `${side} 有利`
+  if (magnitude < 90) return `${side} やや有利`
+  if (magnitude < 230) return `${side} 有利`
   return `${side} 優勢`
 }
 

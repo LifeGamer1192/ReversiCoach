@@ -1,5 +1,5 @@
 import { applyMove, idx, legalMoves, opponent } from './board'
-import { evaluateFor, POSITION_WEIGHTS } from './evaluation'
+import { evaluateFor, POSITION_WEIGHTS, terminalScore } from './evaluation'
 import type { Board, Player, Position } from './types'
 
 /**
@@ -36,7 +36,8 @@ function alphabeta(
   if (moves.length === 0) {
     const foe = opponent(player)
     if (legalMoves(board, foe).length === 0) {
-      return evaluateFor(board, player)
+      // The game is over: score it by the exact disc difference.
+      return terminalScore(board, player)
     }
     return -alphabeta(board, foe, depth, -beta, -alpha)
   }
