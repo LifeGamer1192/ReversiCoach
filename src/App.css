@@ -213,3 +213,87 @@
   margin-left: -1px;
   background: #4caf50;
 }
+
+/* --- difficulty selector --- */
+.difficulty {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.difficulty__label {
+  font-size: 0.82rem;
+  color: #9aa0a6;
+  white-space: nowrap;
+}
+
+.difficulty__options {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+
+.difficulty__btn {
+  flex: 1;
+  padding: 6px 4px;
+  border: 1px solid #3a4049;
+  border-radius: 8px;
+  background: #262b32;
+  color: #cfd3d8;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.difficulty__btn:hover {
+  background: #2f353d;
+}
+
+.difficulty__btn.is-selected {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: #07210d;
+  font-weight: 700;
+}
+
+/* --- score chart --- */
+.chart {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart__caption {
+  font-size: 0.78rem;
+  color: #9aa0a6;
+}
+
+.chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart__bg {
+  fill: #1f242b;
+}
+
+.chart__zero {
+  stroke: #4caf50;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.7;
+}
+
+.chart__line {
+  fill: none;
+  stroke: #5cc8ff;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__dot {
+  fill: #5cc8ff;
+}

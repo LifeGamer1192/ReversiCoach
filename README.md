@@ -19,6 +19,7 @@
 
 - **V1 実装済み** — オセロのロジック・勝敗判定・ランダムAI（人間=黒で先手、AI=白）。合法手のハイライト、パス処理、勝敗表示、リスタートに対応。
 - **V2 実装済み** — 盤面のスコアリング（位置重み＋着手可能数）と有利度バーによる可視化。AI は1手先の評価値が最も高い手を選ぶ貪欲AIに進化。
+- **V3 実装済み** — AI が最大2手先を読む negamax 探索に進化。難易度選択（ランダム／1手読み／2手読み）と、評価値の推移グラフを追加。
 
 ## 技術スタック
 
@@ -48,15 +49,18 @@ npm run preview  # ビルド結果をプレビュー
 
 ```
 src/
-  engine/             ゲームロジック（React 非依存）
-    types.ts          盤面・プレイヤーなどの型定義
-    board.ts          盤面操作・合法手・石の反転
-    game.ts           対局の進行・パス・勝敗判定
-    evaluation.ts     盤面のスコアリング（位置重み＋着手可能数）
-    ai.ts             AI の着手選択（V1: ランダム / V2: 貪欲）
+  engine/                 ゲームロジック（React 非依存）
+    types.ts              盤面・プレイヤーなどの型定義
+    board.ts              盤面操作・合法手・石の反転
+    game.ts               対局の進行・パス・勝敗判定
+    evaluation.ts         盤面のスコアリング（位置重み＋着手可能数）
+    ai.ts                 AI の着手選択（ランダム／negamax 探索）
   components/
-    Board.tsx         盤面の表示
-    AdvantageBar.tsx  有利度バーの表示
-  App.tsx             画面全体・対局進行
-  main.tsx            エントリーポイント
+    Board.tsx             盤面の表示
+    AdvantageBar.tsx      有利度バーの表示
+    DifficultySelector.tsx  難易度選択
+    ScoreChart.tsx        評価値の推移グラフ
+  difficulty.ts           難易度（探索深さ）の定義
+  App.tsx                 画面全体・対局進行
+  main.tsx                エントリーポイント
 ```

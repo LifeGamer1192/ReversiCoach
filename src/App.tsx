@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { AdvantageBar } from './components/AdvantageBar'
 import { Board } from './components/Board'
-import { chooseGreedyMove } from './engine/ai'
+import { DifficultySelector } from './components/DifficultySelector'
+import { ScoreChart } from './components/ScoreChart'
+import { DEFAULT_DIFFICULTY, type DifficultyLevel } from './difficulty'
+import { chooseAiMove } from './engine/ai'
 import { countDiscs } from './engine/board'
 import { evaluateBoard } from './engine/evaluation'
 import { createGame, getWinner, playMove, type GameState } from './engine/game'
@@ -21,37 +24,62 @@ const PLAYER_LABEL: Record<Player, string> = {
 }
 
 export default function App() {
-  const [game, setGame] = useState<GameState>(createGame)
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
+  // The full sequence of game states, oldest first; the last entry is current.
+  const [history, setHistory] = useState<GameState[]>(() => [createGame()])
 
-  // Drive the AI: on its turn, play the highest-scoring move after a short delay.
+  const game = history[history.length - 1]
+
+  // Drive the AI: on its turn, search for a move and play it after a short delay.
   useEffect(() => {
     if (game.status !== 'playing' || game.current !== AI) return
     const timer = setTimeout(() => {
-      setGame((current) => {
-        if (current.status !== 'playing' || current.current !== AI) return current
-        const move = chooseGreedyMove(current.board, AI)
-        return move ? playMove(current, move.row, move.col) : current
+      setHistory((past) => {
+        const current = past[past.length - 1]
+        if (current.status !== 'playing' || current.current !== AI) return past
+        const move = chooseAiMove(current.board, AI, difficulty.depth)
+        if (!move) return past
+        const next = playMove(current, move.row, move.col)
+        return next === current ? past : [...past, next]
       })
     }, AI_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [game])
+  }, [game, difficulty])
 
   const handleCellClick = useCallback((row: number, col: number) => {
-    setGame((current) => {
-      if (current.status !== 'playing' || current.current !== HUMAN) return current
-      return playMove(current, row, col)
+    setHistory((past) => {
+      const current = past[past.length - 1]
+      if (current.status !== 'playing' || current.current !== HUMAN) return past
+      const next = playMove(current, row, col)
+      return next === current ? past : [...past, next]
     })
   }, [])
 
-  const handleRestart = useCallback(() => setGame(createGame()), [])
+  const handleRestart = useCallback(() => setHistory([createGame()]), [])
+
+  // Changing the difficulty starts a fresh game so each game is played
+  // entirely against one opponent.
+  const handleSelectDifficulty = useCallback((level: DifficultyLevel) => {
+    setDifficulty(level)
+    setHistory([createGame()])
+  }, [])
 
   const score = countDiscs(game.board)
   const evaluation = evaluateBoard(game.board)
+  const evalHistory = useMemo(
+    () => history.map((state) => evaluateBoard(state.board)),
+    [history],
+  )
   const humanCanInteract = game.status === 'playing' && game.current === HUMAN
 
   return (
     <main className="app">
       <h1 className="app__title">ReversiCoach</h1>
+
+      <DifficultySelector
+        selectedId={difficulty.id}
+        onSelect={handleSelectDifficulty}
+      />
 
       <section className="scoreboard">
         {(['black', 'white'] as const).map((player) => (
@@ -76,6 +104,8 @@ export default function App() {
       />
 
       <StatusMessage game={game} />
+
+      <ScoreChart values={evalHistory} />
 
       <button className="restart" type="button" onClick={handleRestart}>
         最初から
