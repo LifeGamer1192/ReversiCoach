@@ -15,4 +15,34 @@
 
 ## 開発状況
 
-未着手（リポジトリ初期化のみ）。
+- **V1 実装済み** — オセロのロジック・勝敗判定・ランダムAI（人間=黒で先手、AI=白）。合法手のハイライト、パス処理、勝敗表示、リスタートに対応。
+
+## 技術スタック
+
+- Vite + React + TypeScript
+- 盤面は DOM（CSS Grid）で描画
+- ゲームロジックは `src/engine/`（React 非依存の純粋なモジュール）に分離
+
+## 開発手順
+
+```sh
+npm install      # 依存パッケージのインストール
+npm run dev      # 開発サーバーを起動
+npm run build    # 型チェック + 本番ビルド
+npm run preview  # ビルド結果をプレビュー
+```
+
+## ディレクトリ構成
+
+```
+src/
+  engine/          ゲームロジック（React 非依存）
+    types.ts       盤面・プレイヤーなどの型定義
+    board.ts       盤面操作・合法手・石の反転
+    game.ts        対局の進行・パス・勝敗判定
+    ai.ts          AI の着手選択（V1: ランダム）
+  components/
+    Board.tsx      盤面の表示
+  App.tsx          画面全体・対局進行
+  main.tsx         エントリーポイント
+```

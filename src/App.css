@@ -1,0 +1,157 @@
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.app__title {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+}
+
+/* --- scoreboard --- */
+.scoreboard {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.scoreboard__side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #262b32;
+  border: 2px solid transparent;
+}
+
+.scoreboard__side.is-active {
+  border-color: #4caf50;
+}
+
+.scoreboard__side .disc {
+  width: 22px;
+  height: 22px;
+}
+
+.scoreboard__label {
+  flex: 1;
+  font-size: 0.85rem;
+}
+
+.scoreboard__count {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- board --- */
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  background: #1f6b30;
+  border-radius: 8px;
+}
+
+.cell {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: #2e9c46;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell:enabled {
+  cursor: pointer;
+}
+
+.cell:enabled:hover {
+  background: #37b252;
+}
+
+/* --- discs --- */
+.disc {
+  display: block;
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+  animation: disc-pop 0.16s ease-out;
+}
+
+.disc--black {
+  background: radial-gradient(circle at 35% 30%, #5a5a5a, #0a0a0a);
+}
+
+.disc--white {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #c4c4c4);
+}
+
+@keyframes disc-pop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* --- legal-move hint --- */
+.hint {
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* --- status line --- */
+.status {
+  margin: 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.status--result {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.status__pass {
+  color: #ff9e80;
+}
+
+/* --- restart button --- */
+.restart {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #4caf50;
+  color: #07210d;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.restart:hover {
+  background: #5cc35f;
+}
