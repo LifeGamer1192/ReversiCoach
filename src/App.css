@@ -675,18 +675,3 @@
   background: #3a2f12;
   color: #ffca28;
 }
-
-/* --- subtle menu back-link at the top --- */
-.back-link {
-  align-self: flex-start;
-  font-size: 0.72rem;
-  color: #6a7079;
-  text-decoration: none;
-}
-
-.back-link:hover,
-.back-link:focus-visible {
-  color: #cfd3d8;
-  text-decoration: underline;
-  outline: none;
-}

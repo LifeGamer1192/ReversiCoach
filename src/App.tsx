@@ -260,13 +260,6 @@ export default function App() {
 
   return (
     <main className="app">
-      <a
-        className="back-link"
-        href="https://lifegamer1192.github.io/menu.html"
-        rel="nofollow"
-      >
-        ← メニュー
-      </a>
       <h1 className="app__title">ReversiCoach</h1>
 
       <ColorSelector selected={humanColor} onSelect={handleSelectColor} />
